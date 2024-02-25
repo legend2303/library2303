@@ -1,0 +1,298 @@
+import tkinter as tk
+from tkinter import ttk, scrolledtext
+from tkinter import *
+from tkinter import simpledialog,messagebox
+import sqlite3
+
+# Create a database or connect to one
+conn = sqlite3.connect('library9898.db')
+
+# Create cursor
+c = conn.cursor()
+
+# Create table
+c.execute("""CREATE TABLE IF NOT EXISTS books (
+            title TEXT,
+            author TEXT,
+            isbn TEXT,
+            status TEXT
+            )""")
+
+# Commit changes
+conn.commit()
+
+# Close connection
+conn.close()
+
+class Library:
+    def __init__(self, root):
+        self.root = root
+        self.root.title('Library Management System')
+        self.style = ttk.Style(self.root)
+        self.style.configure('TEntry', fieldbackground='white', foreground='black')
+        self.style.configure('TButton', background='white', foreground='black')
+
+        # Login widgets
+        self.username_label = tk.Label(root, text='Username')
+        self.username_label.grid(row=0, column=0)
+        self.password_label = tk.Label(root, text='Password')
+        self.password_label.grid(row=1, column=0)
+        self.username_entry = tk.Entry(root)
+        self.username_entry.grid(row=0, column=1)
+        self.password_entry = tk.Entry(root, show='*')
+        self.password_entry.grid(row=1, column=1)
+        self.login_button = tk.Button(root, text='Login', command=self.login)
+        self.login_button.grid(row=2, column=1)
+
+    def login(self):
+        username = self.username_entry.get()
+        password = self.password_entry.get()
+
+        # Check credentials (replace with database check if needed)
+        if username == 'admin' and password == 'password':
+            # Hide login widgets
+            self.username_label.grid_remove()
+            self.password_label.grid_remove()
+            self.username_entry.grid_remove()
+            self.password_entry.grid_remove()
+            self.login_button.grid_remove()
+
+            # Show book management widgets
+            self.create_librarian_widgets()
+        elif username == 'student' and password == 'password':
+            self.username_label.grid_forget()
+            self.password_label.grid_forget()
+            self.username_entry.grid_forget()
+            self.password_entry.grid_forget()
+            self.login_button.grid_forget()
+
+            self.create_student_widgets()
+        else:
+            messagebox.showerror('Error', 'Invalid credentials. Please try again.')
+     # Add your other methods here (add_book, delete_book, etc.)
+    def create_student_widgets(self):
+        # Student widgets
+        self.title_label = tk.Label(self.root, text="Book Name")
+        self.title_label.grid(row=0, column=0)
+        self.title_entry = tk.Entry(self.root)
+        self.title_entry.grid(row=0, column=1)
+        self.check_availability_button = tk.Button(self.root, text='Check Book Availability', command=self.check_book_availability)
+        self.check_availability_button.grid(row=6, column=1,pady=10, padx=10, ipadx=58)
+        self.logout1_button = tk.Button(self.root, text='Logout', command=self.logout1)
+        self.logout1_button.grid(row=7, column=2,pady=10, padx=10, ipadx=58)
+        
+    def logout1(self):
+        self.title_label.grid_remove()
+        self.title_entry.grid_remove()
+        self.check_availability_button.grid_remove()
+        self.logout1_button.grid_remove()
+        self.password_entry.delete(0, tk.END)
+        self.username_entry.delete(0, tk.END)
+         # Show login widgets
+        self.username_label.grid(row=0, column=0)
+        self.password_label.grid(row=1, column=0)
+        self.username_entry.grid(row=0, column=1)
+        self.password_entry.grid(row=1, column=1)
+        self.login_button.grid(row=2, column=1)
+
+    def create_librarian_widgets(self):
+        # Create labels
+        self.title_label = tk.Label(self.root, text='Title')
+        self.title_label.grid(row=0, column=0)
+        self.author_label = tk.Label(self.root, text='Author')
+        self.author_label.grid(row=1, column=0)
+        self.isbn_label = tk.Label(self.root, text='ISBN')
+        self.isbn_label.grid(row=2, column=0)
+
+        # Create entry widgets
+        self.title_entry = tk.Entry(self.root)
+        self.title_entry.grid(row=0, column=1)
+        self.author_entry = tk.Entry(self.root)
+        self.author_entry.grid(row=1, column=1)
+        self.isbn_entry = tk.Entry(self.root)
+        self.isbn_entry.grid(row=2, column=1)
+
+        self.books_text = scrolledtext.ScrolledText(self.root, width=30, height=10)
+        self.books_text.grid(row=6, column=0, padx=10, pady=10)
+
+        # Create buttons
+        self.add_button = tk.Button(self.root, text='Add Book', command=self.add_book)
+        self.add_button.grid(row=3, column=0,pady=10, padx=10, ipadx=50)
+        self.delete_button = tk.Button(self.root, text='Delete Book', command=self.delete_book)
+        self.delete_button.grid(row=3, column=1,pady=10, padx=10, ipadx=57)
+        self.borrow_button = tk.Button(self.root, text='Borrow Book', command=self.borrow_book)
+        self.borrow_button.grid(row=4, column=1,pady=10, padx=10, ipadx=58)
+        self.return_button = tk.Button(self.root, text='Return Book', command=self.return_book)
+        self.return_button.grid(row=5, column=0,pady=10, padx=10, ipadx=58)
+        self.update_button = tk.Button(self.root, text='Update Book', command=self.update_book)
+        self.update_button.grid(row=5, column=1,pady=10, padx=10, ipadx=58)
+        self.logout_button = tk.Button(self.root, text='Logout', command=self.logout)
+        self.logout_button.grid(row=9, column=1,pady=10, padx=10, ipadx=58)
+        self.display_books_button = ttk.Button(self.root, text='Display All Books', command=self.display_all_books)
+        self.display_books_button.grid(row=12, column=0, padx=10, pady=76)
+        self.check_availability_button = tk.Button(self.root, text='Check Book Availability', command=self.check_book_availability)
+        self.check_availability_button.grid(row=6, column=1,pady=10, padx=10, ipadx=58)
+
+    def logout(self):
+        # Hide book management widgets
+        self.title_label.grid_remove()
+        self.author_label.grid_remove()
+        self.isbn_label.grid_remove()
+        self.title_entry.grid_remove()
+        self.author_entry.grid_remove()
+        self.isbn_entry.grid_remove()
+        self.add_button.grid_remove()
+        self.delete_button.grid_remove()
+        self.display_books_button.grid_remove()
+        self.borrow_button.grid_remove()
+        self.return_button.grid_remove()
+        self.update_button.grid_remove()
+        self.logout_button.grid_remove()
+        self.books_text.grid_remove()
+        self.password_entry.delete(0, tk.END)
+        self.username_entry.delete(0, tk.END)
+        self.check_availability_button.grid_remove()
+
+
+        # Show login widgets
+        self.username_label.grid(row=0, column=0)
+        self.password_label.grid(row=1, column=0)
+        self.username_entry.grid(row=0, column=1)
+        self.password_entry.grid(row=1, column=1)
+        self.login_button.grid(row=2, column=1)
+
+    def add_book(self):
+        # Connect to database
+        conn = sqlite3.connect('library98.db')
+        c = conn.cursor()
+
+        # Insert into table
+        c.execute("INSERT INTO books VALUES (:title, :author, :isbn, :status)",
+                  {
+                      'title': self.title_entry.get(),
+                      'author': self.author_entry.get(),
+                      'isbn': self.isbn_entry.get(),
+                      'status': 'available'
+                  })
+
+        # Commit changes
+        conn.commit()
+
+        # Close connection
+        conn.close()
+        messagebox.showinfo("Success", "Book added successfully")
+
+        # Clear the input boxes
+        self.title_entry.delete(0, tk.END)
+        self.author_entry.delete(0, tk.END)
+        self.isbn_entry.delete(0, tk.END)
+
+    def display_all_books(self):
+        self.conn = sqlite3.connect('library98.db')
+        self.cursor=self.conn.cursor()
+        self.books_text.delete('1.0', 'end')
+        self.cursor.execute("SELECT * FROM books")
+        books = self.cursor.fetchall()
+        for book in books:
+            self.books_text.insert('end', str(book) + '\n')
+
+    def delete_book(self):
+        # Connect to database
+        conn = sqlite3.connect('library98.db')
+        c = conn.cursor()
+
+        # Delete from table
+        book_id = simpledialog.askstring("Input", "Enter the title of the book to delete",parent=self.root)
+        c.execute("DELETE from books WHERE title=?",(book_id,))
+
+        # Commit changes
+        conn.commit()
+
+        # Close connection
+        conn.close()
+
+        # Clear the input boxes
+        self.title_entry.delete(0, tk.END)
+        self.author_entry.delete(0, tk.END)
+        self.isbn_entry.delete(0, tk.END)
+
+    def check_book_availability(self):
+        self.conn = sqlite3.connect('library98.db')
+        self.cursor=self.conn.cursor()
+        name = self.title_entry.get()
+        self.cursor.execute("SELECT * FROM books WHERE title=?", (name,))
+        book = self.cursor.fetchone()
+        if book is not None:
+            if book[3] == 'available':
+                messagebox.showinfo('Info', 'Book is available')
+            else:
+                messagebox.showinfo('Info', 'Book is not available')
+        else:
+            messagebox.showinfo('Info', 'Book not found')
+
+    def borrow_book(self):
+        # Connect to database
+        conn = sqlite3.connect('library98.db')
+        c = conn.cursor()
+
+        # Update status to borrowed
+        c.execute("UPDATE books SET status = 'borrowed' WHERE title = " + "'" + self.title_entry.get() + "'")
+
+        # Commit changes
+        conn.commit()
+
+        # Close connection
+        conn.close()
+
+        # Clear the input boxes
+        self.title_entry.delete(0, tk.END)
+        self.author_entry.delete(0, tk.END)
+        self.isbn_entry.delete(0, tk.END)
+
+    def return_book(self):
+        # Connect to database
+        conn = sqlite3.connect('library98.db')
+        c = conn.cursor()
+
+        # Update status to available
+        c.execute("UPDATE books SET status = 'available' WHERE title = " + "'" + self.title_entry.get() + "'")
+
+        # Commit changes
+        conn.commit()
+
+        # Close connection
+        conn.close()
+
+        # Clear the input boxes
+        self.title_entry.delete(0, tk.END)
+        self.author_entry.delete(0, tk.END)
+        self.isbn_entry.delete(0, tk.END)
+
+    def update_book(self):
+        # Connect to database
+        conn = sqlite3.connect('library98.db')
+        c = conn.cursor()
+
+        # Update book
+        c.execute("UPDATE books SET author = :author, isbn = :isbn WHERE title = :title",
+                  {
+                      'title': self.title_entry.get(),
+                      'author': self.author_entry.get(),
+                      'isbn': self.isbn_entry.get()
+                  })
+
+        # Commit changes
+        conn.commit()
+
+        # Close connection
+        conn.close()
+
+        # Clear the input boxes
+        self.title_entry.delete(0, tk.END)
+        self.author_entry.delete(0, tk.END)
+        self.isbn_entry.delete(0, tk.END)
+
+root = tk.Tk()
+library98 = Library(root)
+
+root.mainloop()
